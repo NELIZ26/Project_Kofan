@@ -66,11 +66,13 @@ const navbarSolid = computed(() => {
     "account-datos", 
     "account-reservas", 
     "account-avisos", 
-    "account-reserva-detalle" // Este es el nombre que definimos en el router
+    "account-reserva-detalle", // Este es el nombre que definimos en el router
+    "servicios",
+    "hospedaje",
   ];
 
   // 3. Verificamos si el nombre de la ruta actual está en la lista O si empieza por /Account
-  return nombresSolid.includes(route.name) || route.path.startsWith("/Account");
+  return nombresSolid.includes(route.name) || route.path.startsWith("/account");
 });
 </script>
 
@@ -82,7 +84,7 @@ const navbarSolid = computed(() => {
   >
     <div class="container-fluid">
       <router-link to="/home" class="navbar-brand logo-section">
-        <img src="../img/Kofan.png" width="70" alt="Logo Kofán" />
+        <img src="../img/Kofan.png" width="80" alt="Logo Kofán" />
       </router-link>
 
       <button
@@ -106,7 +108,7 @@ const navbarSolid = computed(() => {
             <router-link to="/about" class="nav-link">Nosotros</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/services" class="nav-link">Servicios</router-link>
+            <router-link to="/servicios" class="nav-link">Servicios</router-link>
           </li>
           <li class="nav-item">
             <router-link to="/galeria" class="nav-link">Galería</router-link>

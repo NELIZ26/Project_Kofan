@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 export const useReservaStore = defineStore("reserva", () => {
   // --- ESTADO ---
   const isModalOpen = ref(false);
-  const showSuccess = ref(false); // Mantener por si acaso, aunque SweetAlert lo reemplaza
   const personType = ref("natural");
 
   const form = reactive({
@@ -91,10 +90,6 @@ export const useReservaStore = defineStore("reserva", () => {
         errors.tipoDocumento = true;
         isValid = false;
       }
-      if (!form.fechaNacimiento) {
-        errors.fechaNacimiento = true;
-        isValid = false;
-      }
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -119,52 +114,60 @@ export const useReservaStore = defineStore("reserva", () => {
     return isValid;
   };
 
-  // ✅ FUNCIÓN DE ENVÍO CON SWEETALERT
+  // ✅ FUNCIÓN DE ENVÍO INTEGRADA CON WHATSAPP
   const handleSubmit = async () => {
     if (validateForm()) {
+      // 1. Alerta de procesamiento
       Swal.fire({
         title: "Procesando Reserva...",
         text: "Estamos conectando con la maloka principal",
-        target: "body", // <--- ESTO ES LA CLAVE
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
         },
       });
 
-      setTimeout(() => {
-        Swal.fire({
+      // Simulación de guardado en DB (2 segundos)
+      setTimeout(async () => {
+        // 2. Preparar mensaje de WhatsApp
+        const telefonoHotel = "573124225925";
+        const mensajeWA = `¡Hola Ecohotel Kofán! 🌿%0A` +
+                          `Me gustaría confirmar una reserva:%0A%0A` +
+                          `👤 *Nombre:* ${form.nombres}%0A` +
+                          `🆔 *Doc:* ${form.numDocumento}%0A` +
+                          `🏨 *Alojamiento:* ${form.habitacion}%0A` +
+                          `👥 *Huéspedes:* ${form.cantidadPersonas}%0A` +
+                          `📅 *Check-In:* ${form.fechaReserva}%0A%0A` +
+                          `Espero instrucciones de pago.`;
+
+        // 3. Alerta de éxito antes de redirigir
+        await Swal.fire({
           icon: "success",
-          title: "¡Reserva Registrada!",
-          text: `Gracias ${form.nombres}, hemos recibido tu solicitud.`,
-          target: "body", // <--- TAMBIÉN AQUÍ
+          title: "¡Solicitud Registrada!",
+          text: `Gracias ${form.nombres}, ahora te redirigiremos a WhatsApp para finalizar tu pago.`,
           confirmButtonColor: "#0f3b2a",
-          confirmButtonText: "¡Excelente!",
-          backdrop: `rgba(15, 59, 42, 0.4)`,
+          confirmButtonText: "Ir a WhatsApp 💬",
         });
 
+        // 4. Abrir WhatsApp y limpiar todo
+        window.open(`https://wa.me/${telefonoHotel}?text=${mensajeWA}`, '_blank');
+        
         closeModal();
         resetForm();
       }, 2000);
+
     } else {
       Swal.fire({
         icon: "error",
         title: "Formulario Incompleto",
         text: "Por favor, revisa los campos marcados en rojo.",
-        target: "body", // <--- Y AQUÍ
         confirmButtonColor: "#e74c3c",
       });
     }
   };
 
-  const closeSuccessMessage = () => {
-    showSuccess.value = false;
-    isModalOpen.value = false;
-  };
-
   return {
     isModalOpen,
-    showSuccess,
     personType,
     form,
     errors,
@@ -176,6 +179,6 @@ export const useReservaStore = defineStore("reserva", () => {
     closeModal,
     setPersonType,
     handleSubmit,
-    closeSuccessMessage,
+    resetForm, // Exportado para uso manual si se requiere
   };
 });

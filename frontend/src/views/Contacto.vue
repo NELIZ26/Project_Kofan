@@ -65,7 +65,7 @@
                   class="social-btn"
                   ><font-awesome-icon :icon="['fab', 'instagram']"
                 /></a>
-                <a href="https://wa.link/dtc3ys" class="social-btn"
+                <a href="https://wa.link/gjt05p" class="social-btn"
                   ><font-awesome-icon :icon="['fab', 'whatsapp']"
                 /></a>
               </div>

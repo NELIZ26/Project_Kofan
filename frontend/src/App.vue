@@ -6,11 +6,11 @@ import ReservaModal from "@/components/ReservaModal.vue";
 
 <template>
   <main id="page">
-    <Navbar v-if="$route.name !== 'not-found'" />
+    <Navbar v-if="$route.name !== 'not-found' && !$route.path.startsWith('/admin')" />
     <div id="content">
       <router-view />
     </div>
-    <Footer v-if="$route.name !== 'not-found'" />
+    <Footer v-if="$route.name !== 'not-found' && !$route.path.startsWith('/admin')" />
     <ReservaModal />
   </main>
 </template>
