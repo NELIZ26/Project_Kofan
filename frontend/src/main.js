@@ -13,7 +13,6 @@ import "./styles/global.css";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-
 // Iconos Sólidos (fas)
 import {
   faLeaf,
@@ -36,8 +35,8 @@ import {
   faEarthAmericas,
   faPersonPraying,
   faHandshakeAngle,
-  faDroplet, 
-  faSun, 
+  faDroplet,
+  faSun,
   faMound,
   faPlane,
   faCar,
@@ -54,7 +53,19 @@ import {
   faUser,
   faCompass,
   faSave,
-  faCalendarXmark
+  faCalendarXmark,
+  faPenToSquare,
+  faTrash,
+  faUserPlus,
+  faUserShield,
+  faRotate,
+  faIdCard,
+  faCheck,
+  faXmark,
+  faHandHoldingDollar,
+  faArrowUp,
+  faClock,
+
 } from "@fortawesome/free-solid-svg-icons";
 
 // Iconos de Marcas (fab)
@@ -111,7 +122,18 @@ library.add(
   faUser,
   faCompass,
   faSave,
-  faCalendarXmark
+  faCalendarXmark,
+  faPenToSquare,
+  faTrash,
+  faUserPlus,
+  faUserShield,
+  faRotate,
+  faIdCard,
+  faCheck,
+  faXmark,
+  faHandHoldingDollar,
+  faArrowUp,
+  faClock
 );
 
 // --- CREAR LA APP ---

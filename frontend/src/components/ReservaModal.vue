@@ -1,7 +1,44 @@
 <script setup>
 import { useReservaStore } from "../stores/reserva.js";
-// Asegúrate de tener 'leaf' y 'plus' en tu configuración de FontAwesome
+import Swal from 'sweetalert2';
+
 const store = useReservaStore();
+
+const handleConfirmarReserva = async () => {
+  const isValid = store.handleSubmit(); 
+  
+  if (isValid) {
+    const f = store.form;
+    const telefonoHotel = "+573224225925";
+    
+    const mensajeWA = `¡Hola Ecohotel Kofán! 🌿%0A` +
+                      `Me gustaría confirmar mi solicitud de reserva:%0A%0A` +
+                      `*Nombre:* ${f.nombres}%0A` +
+                      `*Documento:* ${f.numDocumento}%0A` +
+                      `*Alojamiento:* ${f.habitacion}%0A` +
+                      `*Huéspedes:* ${f.cantidadPersonas}%0A` +
+                      `*Check-In:* ${f.fechaReserva}%0A%0A` +
+                      `Quedo atento a las instrucciones para el pago. ¡Muchas gracias!`;
+
+    await Swal.fire({
+      title: "¡Solicitud Registrada!",
+      text: "Para garantizar tu cupo, ahora te redirigiremos a WhatsApp para coordinar el pago.",
+      icon: "success",
+      confirmButtonColor: "#0f3b2a",
+      confirmButtonText: "Ir a WhatsApp",
+      allowOutsideClick: false
+    });
+
+    // 1. Abrimos WhatsApp
+    window.open(`https://wa.me/${telefonoHotel}?text=${mensajeWA}`, '_blank');
+
+    // 2. LIMPIAMOS EL FORMULARIO (Llamando a la función del store)
+    store.resetForm();
+
+    // 3. Cerramos el modal
+    store.closeModal();
+  }
+};
 </script>
 
 <template>
@@ -12,12 +49,12 @@ const store = useReservaStore();
   >
     <div class="modal-card">
       <button class="btn-close-custom" @click="store.closeModal">
-        <font-awesome-icon icon="plus" style="transform: rotate(45deg)" />
+        <font-awesome-icon icon="fa-solid fa-plus" style="transform: rotate(45deg)" />
       </button>
 
       <div class="modal-body">
         <div class="text-center mb-4">
-          <font-awesome-icon icon="leaf" class="verde-kofan mb-2 fs-4" />
+          <font-awesome-icon icon="fa-solid fa-leaf" class="verde-kofan mb-2 fs-4" />
           <h2 class="fw-bold verde-kofan">Reserva tu Experiencia</h2>
           <p class="text-muted small">
             Completa tus datos para vivir la magia del Putumayo
@@ -43,7 +80,7 @@ const store = useReservaStore();
           </button>
         </div>
 
-        <form @submit.prevent="store.handleSubmit" novalidate>
+        <form @submit.prevent="handleConfirmarReserva" novalidate>
           <div class="row g-3">
             <div class="col-md-8">
               <label class="form-label-kofan">{{ store.labelNombres }}</label>
@@ -68,16 +105,6 @@ const store = useReservaStore();
                 <option value="CE">C.E.</option>
                 <option value="PA">Pasaporte</option>
               </select>
-            </div>
-
-            <div class="col-md-6" v-if="store.personType === 'natural'">
-              <label class="form-label-kofan">Fecha de Nacimiento</label>
-              <input
-                type="date"
-                class="input-kofan"
-                v-model="store.form.fechaNacimiento"
-                :class="{ 'is-invalid': store.errors.fechaNacimiento }"
-              />
             </div>
 
             <div class="col-md-6">
@@ -126,16 +153,14 @@ const store = useReservaStore();
             <div class="col-md-4">
               <label class="form-label-kofan">Alojamiento</label>
               <select class="input-kofan" v-model="store.form.habitacion">
-                <option value="Cabana2">Cabaña Individual</option>
-                <option value="CabanaFamilia">Cabaña Familiar</option>
-                <option value="Camping">Zona Camping</option>
+                <option value="Cabaña Individual">Cabaña Individual</option>
+                <option value="Cabaña Familiar">Cabaña Familiar</option>
+                <option value="Zona Camping">Zona Camping</option>
               </select>
             </div>
 
             <div class="col-md-12">
-              <label class="form-label-kofan"
-                >Fecha de Ingreso (Check-In)</label
-              >
+              <label class="form-label-kofan">Fecha de Ingreso (Check-In)</label>
               <input
                 type="date"
                 class="input-kofan"
@@ -148,7 +173,8 @@ const store = useReservaStore();
 
           <div class="text-center mt-5">
             <button type="submit" class="btn-kofan-confirm">
-              Confirmar Reserva
+              <font-awesome-icon icon="fa-solid fa-paper-plane" class="me-2" />
+              Confirmar por WhatsApp
             </button>
           </div>
         </form>
@@ -156,6 +182,11 @@ const store = useReservaStore();
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Tu CSS se mantiene igual, es excelente */
+/* (Asegúrate de mantener los estilos que ya tenías) */
+</style>
 
 <style scoped>
 /* Contenedor principal del modal */
