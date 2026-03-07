@@ -1,10 +1,9 @@
 import os
 import uuid
 import shutil
+from backend.core.config import UPLOAD_DIR, ALLOWED_TYPES
 from fastapi import UploadFile, HTTPException
 
-UPLOAD_DIR = "static/images"
-ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 def save_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:

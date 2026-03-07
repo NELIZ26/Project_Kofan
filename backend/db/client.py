@@ -1,15 +1,19 @@
 import os
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient # <--- CAMBIO CLAVE: Usamos Motor
 from dotenv import load_dotenv
 
-# Esto carga las variables del archivo .env
 load_dotenv()
 
-# Sacamos la URL del .env
-MONGO_URL = os.getenv("MONGO_URI")
+# Aquí seguimos usando tu MONGO_URI de Atlas que tienes en el .env
+uri = os.getenv("MONGO_URI") 
 
-# Conectamos
-cliente = MongoClient(MONGO_URL)
-
-# El instructor usa "fastapi_db", puedes mantenerlo o cambiarlo a "hotel_kofan"
-db = cliente["fastapi_db"]
+try:
+    # Creamos el cliente asíncrono compatible con 'await'
+    client = AsyncIOMotorClient(uri)
+    
+    # Asegúrate de que este nombre sea el de la base de datos en Atlas
+    db = client.kofan_hospedaje_db 
+    
+    print("✅ ¡Conexión asíncrona preparada para MongoDB Atlas!")
+except Exception as e:
+    print(f"❌ Error al configurar la conexión: {e}")

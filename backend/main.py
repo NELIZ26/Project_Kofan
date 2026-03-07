@@ -1,10 +1,13 @@
 from fastapi import FastAPI
-from routers import auth, users, products
-from fastapi.staticfiles import StaticFiles
+from backend.routers import admin, auth, earnings, register, users, bookings, rooms, bookings_sin_auth
 
 app = FastAPI()
 
 app.include_router(auth.router)
 app.include_router(users.router)
-app.include_router(products.router)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(bookings.router)
+app.include_router(register.router)
+app.include_router(earnings.router)
+app.include_router(rooms.router)
+app.include_router(bookings_sin_auth.router)
+app.include_router(admin.router)

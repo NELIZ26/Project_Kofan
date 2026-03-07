@@ -1,17 +1,40 @@
-from bson import ObjectId
+from typing import Optional
 
-def user_schema(user) -> dict:
-    return {
-        "id": str(user["_id"]),
-        "names": user.get("names"),
-        "surnames": user.get("surnames"),
-        "document_type": user.get("document_type"),
-        "document_number": user.get("document_number"),
-        "email": user["email"],  # este sí obligatorio
-        "role": user.get("role", "user"),
-        "disabled": user.get("disabled", False),
-    }
+from pydantic import BaseModel, EmailStr
+
+#Nuevo esquema de registro
+class UserCreate(BaseModel):
+    tipo_persona: str
+    full_name: str
+    type_document: str
+    number_document: str
+    email: str
+    phone: Optional[str] = None
+    password: str
+    role: str = "client" # Por defecto son clientes
 
 
-def users_schema(users) -> list:
-    return [user_schema(user) for user in users] 
+    
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+# Esquema para la respuesta de datos del usuario (sin password)
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
+class AdminUserUpdate(UserUpdate):
+    role: Optional[str] = None
+    number_document: Optional[str] = None
+    tipo_persona: Optional[str] = None 
+

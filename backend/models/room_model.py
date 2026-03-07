@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 
 
-class ProductBase(BaseModel):
+class RoomBase(BaseModel):
     name: str
     description: Optional[str] = None
     price: float
@@ -13,11 +13,11 @@ class ProductBase(BaseModel):
     active: bool = True
 
 
-class ProductCreate(ProductBase):
+class RoomCreate(RoomBase):
     pass
 
 
-class ProductUpdate(BaseModel):
+class RoomUpdate(BaseModel):
     id: str
     name: Optional[str] = None
     description: Optional[str] = None
@@ -28,7 +28,7 @@ class ProductUpdate(BaseModel):
     active: Optional[bool] = None
 
 
-class ProductResponse(ProductBase):
+class RoomResponse(RoomBase):
     id: str
     created_by: str
     updated_by: Optional[str] = None

@@ -1,128 +1,52 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from dependencies.auth import get_current_user, require_admin
-from services.user_service import (
-    get_users as get_users_service,
-    get_user_by_id,
-    create_user as post_create_service,
-    update_user as update_user_service,
-    delete_user,
-    get_user_by_email,
-    get_user_by_document
-)
+from backend.dependencies.auth import required_admin, get_current_user
+from backend.schemas.user_schema import UserUpdate
+from backend.schemas.booking_schema import ReservaCreate
+from backend.services.booking_service import create_booking_service
+from backend.services.user_service import update_user_service, delete_user_service
+
 
 router = APIRouter(
-    prefix="/users",
-    tags=["users"],
-    dependencies=[Depends(get_current_user)]
+    prefix="/users", 
+    tags=["users"], 
 )
 
-
-# Usuario actual
 @router.get("/me")
-def read_me(user: dict = Depends(get_current_user)):
+async def read_me(user=Depends(get_current_user)):  # Dependencia que extrae el usuario actual del token
+    user["_id"] = str(user["_id"])
     return user
 
 
-# Solo admin
-@router.get("/admin")
-def admin_only(user=Depends(require_admin)):
-    return {
-        "message": "Bienvenido, admin!"
-    }
-
-
-# Obtener todos los usuarios
-@router.get("/")
-def get_users(page: int = 1, limit: int = 10, user=Depends(require_admin)):
-    return get_users_service(page, limit)
-
-
-# Obtener usuario por ID
-@router.get("/{user_id}")
-def get_user(user_id: str, user=Depends(require_admin)):
-
-    db_user = get_user_by_id(user_id)
-
-    if not db_user:
-        raise HTTPException(
-            status_code=404,
-            detail="Usuario no encontrado"
-        )
-
-    return db_user
-
-
-# Crear usuario
-@router.post("/", status_code=201)
-def create_user(New_user: dict, user=Depends(require_admin)):
-
-    user_email = get_user_by_email(New_user["email"])
-
-    if user_email:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="El correo ya se encuentra registrado"
-        )
+@router.patch("/update-me")
+async def update_me(data: UserUpdate, current_user = Depends(get_current_user)):
+    update_dict = data.model_dump(exclude_unset=True)
     
-    user_document = get_user_by_document(New_user["document_number"])
+    if not update_dict:
+        raise HTTPException(status_code=400, detail="No enviaste datos para actualizar")
 
-    if user_document:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="El número de documento ya se encuentra registrado"
-        )
-
-    user_dic = dict(New_user)
-    if user_dic.get("id"):
-        del user_dic["id"]
-
-    resp = post_create_service(user_dic)
-    if not resp:
-        raise HTTPException(
-            status_code=400,
-            detail="Error al crear el usuario"
-        )
-
-    return resp
-
-
-# Actualizar usuario
-@router.put("/")
-def update_user(data_user: dict, user=Depends(require_admin)):
-
-    id = data_user.get("id")
-    if not id:
-        raise HTTPException(
-            status_code=400,
-            detail="ID de usuario es requerido"
-        )   
+    user_id = str(current_user["_id"])
+    user_updated = await update_user_service(user_id, update_dict)
     
-    resp = update_user_service(data_user)
-    if not resp:
-        raise HTTPException(
-            status_code=404,
-            detail="Id de usuario invalido"
-        )
-    return resp
+    if not user_updated:
+        raise HTTPException(status_code=404, detail="No se pudo actualizar el usuario")
+
+    user_updated["_id"] = str(user_updated["_id"])
+    user_updated.pop("password", None)
+    
+    return {"message": "¡Perfil actualizado con éxito!", "user": user_updated}
 
 
-# Eliminar usuario
-@router.delete("/{user_id}")
-def delete_existing_user(user_id: str, user=Depends(require_admin)):
-
-    db_user = get_user_by_id(user_id)
-
-    if not db_user:
-        raise HTTPException(
-            status_code=404,
-            detail="Usuario no encontrado"
-        )
-
-    if delete_user(user_id):
-        return {
-        "message": "Usuario eliminado correctamente"
-    }
-
-    return {
-        "message": "Error al eliminar el usuario"
-    }
+# 3. ELIMINAR MI PERFIL?
+@router.patch("/delete-me") # Cambiamos a PATCH porque estamos actualizando un estado
+async def delete_me(current_user = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    
+    # 1. ¿Tiene reservas activas? (Opcional: evitar que se borre si tiene viajes pendientes)
+    # reservas_activas = await check_active_bookings(user_id)
+    
+    success = await deactivate_user_service(user_id)
+    
+    if not success:
+        raise HTTPException(status_code=400, detail="No se pudo desactivar la cuenta")
+    
+    return {"message": "Cuenta desactivada correctamente. ¡Esperamos verte pronto!"}
