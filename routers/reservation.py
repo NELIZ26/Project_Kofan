@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from db.client import db 
 from services.reservation_services import get_reservation_stats
-#from dependencies.auth import oauth2_scheme # Importo el esquema directamente
 from core.config import SECRET, ALGORITHM 
 from jose import jwt
-from bson import ObjectId
+
 
 router = APIRouter(
     prefix="/reservations",
@@ -19,7 +18,6 @@ async def get_reservation_history(
     exit_date: str = None     # Parámetro opcional del calendario 2
 ):
     try:
-        # 1. IdentificO el usuario (Nelson)
         auth_header = request.headers.get("Authorization")
         token = auth_header.split(" ")[1]
         payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
@@ -31,7 +29,6 @@ async def get_reservation_history(
         user_id = str(user_db["_id"])
 
 
-        # 2. Construyo la Query dinámica
         query = {"client_id": user_id}
         
         if entry_date and exit_date:
@@ -53,12 +50,10 @@ async def get_reservation_history(
 @router.delete("/limpiar")
 async def delete_filtered_reservations(request: Request):
     try:
-        # 1. Obtengo las fechas del JSON enviado por el botón filtrar (boton naranja)
         data = await request.json()
         fecha_inicio = data.get("entry_date")
         fecha_fin = data.get("exit_date")
         
-        # 2. Identifico al cliente Nelson de forma manual  
         auth_header = request.headers.get("Authorization")
         token = auth_header.split(" ")[1]
         payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
@@ -69,7 +64,6 @@ async def delete_filtered_reservations(request: Request):
         
         user_id_str = str(user_db["_id"])
 
-        # 3. Borro directamente en MongoDB para evitar confusiones de archivos
         query = {
             "client_id": user_id_str,
             "entry_date": {"$gte": fecha_inicio},
@@ -96,7 +90,6 @@ async def delete_filtered_reservations(request: Request):
 @router.get("/stats")
 async def get_my_reservation_stats(request: Request):
     try:
-        # 1. Identifico al usuario manualmente por el token 
         auth_header = request.headers.get("Authorization")
         if not auth_header: 
             raise HTTPException(status_code=401, detail="No autorizado")

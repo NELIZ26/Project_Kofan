@@ -35,7 +35,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "sub": client_db["email"]
     })
    
-    # ... después de generar access_token y refresh_token
     try:
         client_db["id"] = str(client_db["_id"])
         if "_id" in client_db:

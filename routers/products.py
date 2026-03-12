@@ -23,12 +23,10 @@ UPLOAD_DIR = "static/images"
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# CREATE PRODUCT
 @router.post("/")
 def create(data: ProductCreate, user=Depends(require_admin)):
     return create_product(data.dict(), user.email)
 
-# LIST PRODUCTS
 @router.get("/")
 def list_products(
     page: int = 1,

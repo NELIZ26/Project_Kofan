@@ -4,7 +4,6 @@ from schemas.reservation_schema import reservation_schema, reservations_schema
 collection = db.reservas
 
 def get_reservations_by_user(user_id: str, check_in: str = None, check_out: str = None):
-    # Filtro base por usuario
     query = {"user_id": user_id}
     
     # cuando el usuario en Vue usa los filtros de fecha,aqui es donde mongo los procesa 
@@ -23,7 +22,6 @@ def create_reservation(reservation_data: dict):
 
 def bulk_delete_reservations(user_id: str, fecha_inicio: str, fecha_fin: str):
     try:
-        # Filtramos por el ID del usuario Y el rango de fechas
         query = {
             "user_id": user_id,
             "fecha_reserva": {
@@ -40,7 +38,7 @@ def bulk_delete_reservations(user_id: str, fecha_inicio: str, fecha_fin: str):
     
 async def get_reservation_stats(user_id: str):
     try:
-        # Contamos cada estado de forma independiente para el ID de Nelson
+        # Contamos cada estado de forma independiente
         aceptadas = db.reservas.count_documents({"user_id": user_id, "estado": "ACEPTADA"})
         pendientes = db.reservas.count_documents({"user_id": user_id, "estado": "PENDIENTE"})
         canceladas = db.reservas.count_documents({"user_id": user_id, "estado": "CANCELADA"})

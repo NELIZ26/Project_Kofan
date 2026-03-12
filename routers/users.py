@@ -23,20 +23,13 @@ router = APIRouter(
 )
 
 
-'''@router.get("/me", response_model=UserBase, response_model_exclude_none=True)
-def read_me(user_dict: dict = Depends(get_current_user)):
-    # get_current_user devuelve el diccionario directo de la DB
-    return user_schema(user_dict)'''
-
 @router.get("/me")
 async def read_me(request: Request):
     try:
-        # 1. Identificación por token (como ya lo tienes)
         auth_header = request.headers.get("Authorization")
         token = auth_header.split(" ")[1]
         payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
         
-        # 2. Buscar en 'clients' (con await)
         user_db = await db.clients.find_one({"email": payload.get("sub")})
         
         if user_db:
@@ -121,30 +114,23 @@ async def update_my_profile(
     current_user: UserBase = Depends(get_current_user)
 ): 
     try:
-        # 1. Datos enviados por el usuario
         update_data = user_update.model_dump(exclude_unset=True)
 
-        # 2. Mapeo manual de campos (Soporta nombres en español e inglés)
         if hasattr(user_update, 'telefono') and user_update.telefono:
             update_data["phone"] = update_data.pop("telefono")
         if hasattr(user_update, 'direccion') and user_update.direccion:
             update_data["address"] = update_data.pop("direccion")
 
-        # --- INICIO DE LA SUGERENCIA (LÓGICA ROBUSTA) ---
         
-        # Obtenemos person_type de forma segura (funciona si current_user es dict u objeto)
         tipo_actual = getattr(current_user, "person_type", None) or (current_user.get("person_type") if isinstance(current_user, dict) else None)
         tipo = update_data.get("person_type", tipo_actual)
 
-        # Obtenemos el email y company_name de forma segura también
         email_actual = getattr(current_user, "email", None) or (current_user.get("email") if isinstance(current_user, dict) else None)
         empresa_actual = getattr(current_user, "company_name", None) or (current_user.get("company_name") if isinstance(current_user, dict) else None)
 
-        # --- FIN DE LA SUGERENCIA ---
 
         if tipo in ["Juridica", "Jurídica"]:
             update_data["document_type"] = "NIT"
-            # Mantenemos el nombre de la empresa si no se envió uno nuevo
             if "Company_name" not in update_data and empresa_actual:
                 update_data["Company_name"] = empresa_actual
             
@@ -156,7 +142,6 @@ async def update_my_profile(
                 {"$set": update_data, "$unset": {"Company_name": ""}}
             )
 
-        # 4. Recuperamos y limpiamos respuesta
         updated_user_db = await db.clients.find_one({"email": email_actual})
         
         if not updated_user_db:

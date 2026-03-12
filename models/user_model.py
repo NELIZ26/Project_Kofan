@@ -21,16 +21,12 @@ class UserBase(BaseModel):
 
     @model_validator(mode='after')
     def validate_company_by_type(self):
-        # Si es Natural, forzamos que company_name sea None
         if self.person_type == "Natural":
             self.company_name = None
-        # Si es Jurídica y no trae nombre de empresa, podrías lanzar un error aquí si quisieras
         return self
     
 # 2. LUEGO LA QUE HEREDA
 class UserPassword(UserBase):
-    # 'exclude=True' permite que el modelo TENGA el dato para validar,
-    # pero FastAPI lo ELIMINA automáticamente al generar el JSON de respuesta.
     password: str = Field(..., exclude=True)
 
 # Se define por separado para que todos los campos sean opcionales

@@ -1,9 +1,9 @@
 from db.client import db
-from models.user_model import UserBase, UserPassword
+from models.user_model import UserBase
 from bson import ObjectId
 from bson.errors import InvalidId
 from core.security import hash_password 
-from schemas.user_schema import user_schema, users_schema
+from schemas.user_schema import user_schema
 
 
 collection = db["clients"]
@@ -19,12 +19,11 @@ async def get_user_by_document(document: str):
     client = await collection.find_one({"document": document})
     if not client:
         return None
-    # Simplemente retorna el diccionario procesado
     return user_schema(client)
  
 
 async def get_user_db(email: str):
-    print(f"DEBUG: Buscando exactamente: '{email}'") # Las comillas ayudan a ver espacios
+    print(f"DEBUG: Buscando exactamente: '{email}'") 
     user = await collection.find_one({"email": email})
     if user:
         print(f"DEBUG: Usuario encontrado en Atlas: {user.get('email')}")
@@ -32,9 +31,6 @@ async def get_user_db(email: str):
         print("DEBUG: Usuario NO encontrado")
     return user
 
-
-#def get_all_users():
-#    return users_schema(collection.find())    
 
 async def get_users(page: int, limit: int):
 
@@ -65,7 +61,6 @@ async def create_user(data: dict):
         data["password"] = hash_password(data["password"])
     result = await collection.insert_one(data)
     new_user = await collection.find_one({"_id": result.inserted_id})
-    # Importante: user_schema debe devolver nombres que UserBase reconozca
     return UserBase(**user_schema(new_user))
 
 
